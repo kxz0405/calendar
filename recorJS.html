@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js"
+        integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="recorJS.css">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div class="head">
+        <div class="tittle-slog">
+            <span style="color: rgb(248, 151, 151);">Ph</span>
+            <span style="color: rgb(86, 106, 218);">calendar</span>
+        </div>
+
+        <div class="tittle">
+            <div class="tittle-year">
+                <button onclick="settoday()">今天</button>
+                <div class="adyear" role="button"><span></span><i class="fas fa-angle-left" id="adicon"
+                        onclick="adyear(-1)"></i></div>
+                <span id="tod-year"></span>
+                <div class="adyear" role="button"><span></span><i class="fas fa-angle-right" id="adicon"
+                        onclick="adyear(1)"></i></div>
+                <div class="adyear" role="button"><span></span><i class="fas fa-angle-left" id="adicon"
+                        onclick="admounth(-1)"></i></div>
+                <span id="tod-mounth"></span>
+                <div class="adyear" role="button"><span></span><i class="fas fa-angle-right" id="adicon"
+                        onclick="admounth(1)"></i></div>
+            </div>
+        </div>
+        
+        <div class="humbar">
+            -
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="calen">
+        <!-- <div class="creatdata">
+            <div class="creat-b"><input type="button" value="建立"></div>
+            <div class="userdata">
+                <div>已建立時程</div>
+            </div>
+        </div> -->
+        <div class="date-content">
+            <input type="text" placeholder="輸入內容">
+            <button class="submit">送出</button>
+            <button class="exit">退出</button>
+        </div>
+        <div class="mounth">
+            <!-- <div class="weekday">
+                <div>周日</div>
+                <div>周一</div>
+                <div>周二</div>
+                <div>周三</div>
+                <div>周四</div>
+                <div>周五</div>
+                <div>周六</div>
+            </div> -->
+        </div>
+        
+    </div>
+
+
+
+
+    <script src="jquery-3.4.1.js"></script>
+    <script>
+
+        $('.date-content').hide()
+
+        let _weeks=['日','一','二','三','四','五','六']
+        let tod_yaer = document.getElementById('tod-year')
+        let tod_mounth = document.getElementById('tod-mounth')
+        var data = new Date()
+        var todayyear = calenyear = data.getFullYear()
+        let todaymounth = calenmounth = data.getMonth()
+        
+
+
+        settoday()
+
+        function mounthdaycount(y, m) {
+            let mounthdays = new Date(y, m, 0).getDate()
+            return mounthdays
+        }
+
+        function prevm(y, m) {
+            return { y: m == 1 ? y - 1 : y, m: m == 1 ? 12 : (m - 1) }
+        }
+
+        function nextm(y, m) {
+            return { y: m == 12 ? y + 1 : y, m: m == 12 ? 1 : (m + 1) }
+        }
+
+        function creatMounthArr(y, m) {
+            let firstdayweek = new Date(y, m - 1, 1).getDay();
+            let prevmounthcount = new Date(y, m-1, 0).getDate();
+            let preyear = new Date(y - 1, m, 0).getFullYear()
+            let mounthcount = mounthdaycount(y, m);
+            let weekcount = parseInt((firstdayweek + mounthcount) / 7 + (((firstdayweek + mounthcount) % 7) ? 1 : 0))
+            let prevmounth = new Date(y, m - 1, 0).getMonth()
+            let pre = prevm(y, m)
+            let next = nextm(y, m)
+            return Array.apply(null, Array(weekcount)).map(function (_, i) {
+                return Array.apply(null, Array(7)).map(function (_, j) {
+                    var d = i * 7 + j - firstdayweek + 1
+                    let m2 = m
+                    let y2 = y
+
+                    if (d > mounthcount) {
+                        d = d - mounthcount
+                        m2 = next.m
+                        y2 = next.y
+                    }
+                    if (d <= 0) {
+                        d = d + prevmounthcount
+                        m2 = pre.m
+                        y2 = pre.y
+                    }
+                    return {
+                        y: y2,
+                        m: m2,
+                        d: d
+                    }
+                })
+            })
+            // console.error(c)
+        }
+        function printmountharr(y, m) {
+            let mountharr1 = creatMounthArr(y, m);
+
+            let w= $('<div />').addClass('weekday').append(
+                _weeks.map(function(t){
+                    return $('<div />').text(t)
+                })
+            )
+            // console.log(w)
+
+            let ds = mountharr1.map(function (c) {
+                return $('<div />').addClass('days').append(
+                    c.map(function (d) {
+                        return $('<div />').attr('data-y',d.y).attr('data-m',d.m).attr('data-d',d.d)
+                    }))
+            })
+            // console.error(ds)
+            $('.mounth').empty().append(w).append(ds)
+        }
+        printmountharr(calenyear,calenmounth+1)
+
+
+        function settoday() {
+            let todayyear = calenyear = data.getFullYear()
+            let todaymounth = calenmounth = data.getMonth()
+            tod_yaer.innerHTML = todayyear + "年"
+            tod_mounth.innerHTML = todaymounth + 1 + "月"
+            printmountharr(calenyear,calenmounth+1)
+        }
+
+        function adyear(fix) {
+            calenyear += fix;
+            tod_yaer.innerHTML = calenyear + "年"
+            printmountharr(calenyear,calenmounth+1)
+        }
+
+        function admounth(fix) {
+            calenmounth += fix
+            if (calenmounth > 11) {
+                calenyear += 1;
+                calenmounth = 0;
+            } else if (calenmounth < 0) {
+                calenyear -= 1;
+                calenmounth = 11;
+            }
+            tod_yaer.innerHTML = calenyear + "年"
+            tod_mounth.innerHTML = calenmounth + 1 + "月"
+            printmountharr(calenyear,calenmounth+1)
+        }
+
+        // $('.days >div').on('click',function(){
+        //     let clickdiv=$('.days>div')
+        //     $('.date-content').show(500)
+        // })
+
+        // $('.exit').on('click',function(){
+        //     $('.date-content').hide(500)
+        // })
+        // $('.submit').on('click',function(){
+            
+        //     let con=$('.date-content > input').val().trim()
+        //     if(!con) return
+        //     $.ajax({
+        //         url:"http://localhost:3000/users",
+        //         type:"post",
+        //         dataType:"json",
+        //         data:{
+        //             content:con
+        //         }
+        //     })
+        // })
+
+        
+
+    </script>
+</body>
+
+</html>
